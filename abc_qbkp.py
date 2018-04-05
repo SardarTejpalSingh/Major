@@ -1,11 +1,11 @@
 import random
 import re
 
-beeCount = 50
+beeCount = 500
 onlookersCount = beeCount//2
 employedCount = beeCount//2
 scout = 1
-iterCount = 30
+iterCount = 1
 maxForagingCount = 20
 
 dataset = open("data.txt", "r")
