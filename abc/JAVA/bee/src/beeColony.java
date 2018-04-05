@@ -115,8 +115,6 @@ public  class beeColony {
 		GlobalMin=f[0];
 	    for(i=0;i<D;i++)
 	    GlobalParams[i]=Foods[0][i];
-
-
 	}
 
 	void SendEmployedBees()
