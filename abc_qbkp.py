@@ -1,5 +1,6 @@
 import random
 import re
+import time
 
 beeCount = 50
 onlookersCount = beeCount//2
@@ -7,6 +8,7 @@ employedCount = beeCount//2
 scout = 1
 iterCount = 30
 maxForagingCount = 20
+cycles = 2500
 
 dataset = open("data.txt", "r")
 
@@ -82,27 +84,78 @@ def printbestSolution(finalSolutions):
         print(weights[j], end=" ")
     print(" Risk = ",minRisk)    
 
+
+def bestSolutionSelector(finalSolutions):
+    index, i  = 0, 0
+    minRisk = 100000000000000000000
+    for everySolution in finalSolutions:
+        risk = risk_calculator(everySolution)
+        if risk < minRisk:
+            minRisk = risk
+            index = i
+        i += 1
+    return finalSolutions[index]
+
+
+def minRisk(solution1, solution2):
+    '''Returns solution with minimum risk'''
+    
+
 def init():
     '''Algorithm begins here'''
     for algIteration in range(iterCount):     #Algorithm repeater loop
-        employedSolutions = []      #Solutions list
-        for _ in range(employedCount):
-            employedBee = initial_solution()       #Generate the initial solution
-            employedRisk = risk_calculator(employedBee)    #Calculate the risk of initial solution
-            forage =  0                                             #Failed consecutive forage counts
-            while True and forage != maxForagingCount:
-                onlookerSolution = neighbouring_solution(employedBee)
-                onlookerSolutionRisk = risk_calculator(onlookerSolution)
-                if onlookerSolutionRisk < employedRisk:
-                    employedBee = onlookerSolution                #Employed Bee moves to the onlooker's solution
-                    #forage = 0
-                else:
-                    forage += 1                 
-            
+        employedSolutions = risksOfEmployedBee = [] #Solutions list
+        start = time.clock()     
+
+        count = 0
+        #Employed Bee Phase
+        while count < employedCount:
+            employedBee = initial_solution()       #Generate the initial solution            
             if employedBee not in employedSolutions:
                 employedSolutions.append(employedBee)
+                employedRisk = risk_calculator(employedBee)    #Calculate the risk of initial solution
+                risksOfEmployedBee.append(employedRisk)
+                count += 1
+            
+
+        #Onlooker Bee Phase
+        globalBest = bestSolutionSelector(employedSolutions)
+        globalRisk = risk_calculator(globalBest)
+
+        onlookerBees = 0
+        while onlookerBees < onlookersCount:
+            trials = 0
+            for cycleCount in range(cycles):
+                onlookerBee = neighbouring_solution(employedSolutions[onlookerBees])
+                onlookerRisk = risk_calculator(onlookerBee)
+
+                #Returns the solution with minimum risk when compared two risks
+                if risksOfEmployedBee[onlookerBees] < onlookerRisk:
+                    betterSolution = employedSolutions[onlookerBees]
+                    trials += 1
+                else:
+                    betterSolution = onlookerBee    
+                    trials = 0
+                employedSolutions[onlookerBees] = betterSolution
+                risksOfEmployedBee[onlookerBees] = risk_calculator(betterSolution)
+
+                #Returns the solution with minimum risk when compared two risks
+                betterSolution = globalBest if globalRisk < onlookerRisk else onlookerBee
+
+                globalBest = betterSolution
+                globalRisk = risk_calculator(globalBest)
+
+                #Scout Bee Phase
+                if trials == 50:
+                    employedSolutions[onlookerBees] = launch_scout_bee(employedSolutions)
+                    onlookerBees -= 1
+                    break
+
+            onlookerBees += 1
+            
         
         print("Iteration: ",algIteration)
         printbestSolution(employedSolutions)
+        print("Time taken: ",time.clock() - start)
 
 init()
