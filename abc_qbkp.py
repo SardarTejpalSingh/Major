@@ -2,11 +2,11 @@ import random
 import re
 import time
 
-beeCount = 500
+beeCount = 100
 onlookersCount = beeCount//2
 employedCount = beeCount//2
 scout = 1
-iterCount = 1
+iterCount = 100
 maxForagingCount = 20
 cycles = 2500
 limit = 50
@@ -98,19 +98,27 @@ def best_solution_selector(finalSolutions):
             index = i
         i += 1
     return finalSolutions[index]
-
-
-def min_risk(solution1, solution2):
-    '''Returns solution with minimum risk'''
-    pass
     
+
+def pick_a_solution(employedSolutions, risksOfEmployedBee):
+    '''Returns the index of single solution selected by binary tournament method'''
+    twoRandomIndices = random.sample(range(0, len(employedSolutions)), 2)
+    risk1 = risksOfEmployedBee[twoRandomIndices[0]]
+    risk2 = risksOfEmployedBee[twoRandomIndices[1]]
+    probability = (random.randrange(0,100,1))/100
+    if probability < 0.6:
+        return (twoRandomIndices[0] if risk1 < risk2 else twoRandomIndices[1])
+    else:
+        return (twoRandomIndices[0] if risk1 > risk2 else twoRandomIndices[1])
+
 
 def init():
     '''Algorithm begins here'''
     #Algorithm repeater loop
     for algIteration in range(iterCount):    
         #Solutions list 
-        employedSolutions = risksOfEmployedBee = [] 
+        employedSolutions = []
+        risksOfEmployedBee = [] 
         start = time.clock()     
 
         count = 0
@@ -125,7 +133,7 @@ def init():
                 risksOfEmployedBee.append(employedRisk)
                 count += 1
             
-
+        print("Employed Bee Phase")
         """
         Employed Bee Phase
         """
@@ -135,7 +143,8 @@ def init():
         onlookerBees = 0
         while onlookerBees < onlookersCount:
             trials = 0
-            for cycleCount in range(cycles):
+            for cycleCount in range(100):
+                #print(cycleCount, end=" ")
                 onlookerBee = neighbouring_solution(employedSolutions[onlookerBees])
                 onlookerRisk = risk_calculator(onlookerBee)
 
@@ -157,47 +166,47 @@ def init():
 
             onlookerBees += 1
 
-        
+        print("onLooker Bee phase")
         """
         Onlooker Bee phase
         """
-        globalBest = best_solution_selector(employedSolutions)
-        globalRisk = risk_calculator(globalBest)
-
         onlookerBees = 0
         while onlookerBees < onlookersCount:
-            trials = 0
-            for cycleCount in range(cycles):
-                onlookerBee = neighbouring_solution(employedSolutions[onlookerBees])
+            pickedSolutionIndex = pick_a_solution(employedSolutions, risksOfEmployedBee)
+            trials, cycleCount = 0, 0
+            while cycleCount < cycles:
+
+                cycleCount += 1
+
+                onlookerBee = neighbouring_solution(employedSolutions[pickedSolutionIndex])
                 onlookerRisk = risk_calculator(onlookerBee)
 
                 #Returns the solution with minimum risk when compared two risks
-                if risksOfEmployedBee[onlookerBees] < onlookerRisk:
-                    betterSolution = employedSolutions[onlookerBees]
+                if risksOfEmployedBee[pickedSolutionIndex] < onlookerRisk:
+                    betterSolution = employedSolutions[pickedSolutionIndex]
                     trials += 1
                 else:
                     betterSolution = onlookerBee    
                     trials = 0
-                employedSolutions[onlookerBees] = betterSolution
-                risksOfEmployedBee[onlookerBees] = risk_calculator(betterSolution)
+                employedSolutions[pickedSolutionIndex] = betterSolution
+                risksOfEmployedBee[pickedSolutionIndex] = risk_calculator(betterSolution)
 
                 #Returns the solution with minimum risk when compared two risks
                 betterSolution = globalBest if globalRisk < onlookerRisk else onlookerBee
 
-                globalBest = betterSolution
-                globalRisk = risk_calculator(globalBest)
-
-                #Scout Bee Phase
+                globalBest, globalRisk = (globalBest,globalRisk) if globalRisk < onlookerRisk else (onlookerBee,onlookerRisk)              
+                
+                # Food source exhausted. Launch scout bee!
                 if trials == limit:
-                    employedSolutions[onlookerBees] = launch_scout_bee(employedSolutions)
-                    onlookerBees -= 1
-                    break
+                    print("Scout Bee Delpoyed")
+                    employedSolutions[pickedSolutionIndex] = launch_scout_bee(employedSolutions)
+                    cycleCount -= 1
 
             onlookerBees += 1
-            
+
         
         print("Iteration: ",algIteration)
-        print_best_solution(employedSolutions)
+        print(globalBest, globalRisk)
         print("Time taken: ",time.clock() - start)
 
 init()
