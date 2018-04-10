@@ -7,8 +7,8 @@ onlookersCount = beeCount//2
 employedCount = beeCount//2
 scout = 1
 iterCount = 10
-cycles = 100
-limit = 20
+cycles = 300
+limit = 50
 
 dataset = open("data.txt", "r")
 
@@ -24,14 +24,23 @@ for i in range(n-1):
 
 def risk_calculator(solution):
     '''Returns the risk value of the solution'''
-    risk_value = 0
+    risk_value = -1
     for i in range(n-1):
         for j in range(n-1):
             if i in solution and j in solution:
-                risk_value += risk_ar[i][j]
+                risk_value = max(risk_value, risk_ar[i][j])
     
     return risk_value
 
+def extract_max(solution):
+    '''Returns the max risk value of the solution'''
+    risk_value = -1
+    for i in range(n-1):
+        for j in range(n-1):
+            if i in solution and j in solution:
+                risk_value = max(risk_value, risk_ar[i][j])
+    
+    return risk_value
 
 def initial_solution():
     '''Returns a list containing indices of initial solution'''
@@ -59,7 +68,7 @@ def neighbouring_solution(solution):
     while total < capacity and i < len(newEleList):
         if newEleList[i] not in solution:
             solution.append(newEleList[i])
-            total+=weights[newEleList[i]]
+            total += weights[newEleList[i]]
         i+=1
     return sorted(solution)
 
@@ -149,13 +158,12 @@ def init():
 
                 #Returns the solution with minimum risk when compared two risks
                 if risksOfEmployedBee[onlookerBees] < onlookerRisk:
-                    betterSolution = employedSolutions[onlookerBees]
                     trials += 1
                 else:
                     betterSolution = onlookerBee    
                     trials = 0
-                employedSolutions[onlookerBees] = betterSolution
-                risksOfEmployedBee[onlookerBees] = risk_calculator(betterSolution)
+                    employedSolutions[onlookerBees] = betterSolution
+                    risksOfEmployedBee[onlookerBees] = risk_calculator(betterSolution)
 
                 #Returns the solution with minimum risk when compared two risks
                 betterSolution = globalBest if globalRisk < onlookerRisk else onlookerBee
@@ -182,13 +190,12 @@ def init():
 
                 #Returns the solution with minimum risk when compared two risks
                 if risksOfEmployedBee[pickedSolutionIndex] < onlookerRisk:
-                    betterSolution = employedSolutions[pickedSolutionIndex]
                     trials += 1
                 else:
                     betterSolution = onlookerBee    
                     trials = 0
-                employedSolutions[pickedSolutionIndex] = betterSolution
-                risksOfEmployedBee[pickedSolutionIndex] = risk_calculator(betterSolution)
+                    employedSolutions[pickedSolutionIndex] = betterSolution
+                    risksOfEmployedBee[pickedSolutionIndex] = risk_calculator(betterSolution)
 
                 #Returns the solution with minimum risk when compared two risks
                 betterSolution = globalBest if globalRisk < onlookerRisk else onlookerBee
@@ -204,9 +211,10 @@ def init():
 
             onlookerBees += 1
 
-        
+        bottleNeck = risk_calculator(globalBest)
         print("Iteration: ",algIteration)
-        print(globalBest, globalRisk)
+        print(globalBest, globalRisk, bottleNeck)
         print("Time taken: ",time.clock() - start)
+        print(risksOfEmployedBee)
 
 init()

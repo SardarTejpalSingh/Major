@@ -11,7 +11,8 @@ for i in range(n-1):
 
 risk_ar.sort()
 risk_ar = list(set(risk_ar))
+risk_ar.sort()
 print(risk_ar)
-print(risk_ar[1653])
+print(risk_ar[1194])
 
 
