@@ -2,14 +2,13 @@ import random
 import re
 import time
 
-beeCount = 100
+beeCount = 50
 onlookersCount = beeCount//2
 employedCount = beeCount//2
 scout = 1
-iterCount = 100
-maxForagingCount = 20
-cycles = 2500
-limit = 50
+iterCount = 10
+cycles = 100
+limit = 20
 
 dataset = open("data.txt", "r")
 
@@ -143,7 +142,7 @@ def init():
         onlookerBees = 0
         while onlookerBees < onlookersCount:
             trials = 0
-            for cycleCount in range(100):
+            for cycleCount in range(cycles):
                 #print(cycleCount, end=" ")
                 onlookerBee = neighbouring_solution(employedSolutions[onlookerBees])
                 onlookerRisk = risk_calculator(onlookerBee)
@@ -166,7 +165,7 @@ def init():
 
             onlookerBees += 1
 
-        print("onLooker Bee phase")
+        print("Onlooker Bee phase")
         """
         Onlooker Bee phase
         """
@@ -198,9 +197,10 @@ def init():
                 
                 # Food source exhausted. Launch scout bee!
                 if trials == limit:
+                    '''Scout bee phase'''
                     print("Scout Bee Delpoyed")
                     employedSolutions[pickedSolutionIndex] = launch_scout_bee(employedSolutions)
-                    cycleCount -= 1
+                    cycleCount = 0
 
             onlookerBees += 1
 
