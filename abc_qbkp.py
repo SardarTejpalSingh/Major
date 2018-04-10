@@ -197,9 +197,6 @@ def init():
                     employedSolutions[pickedSolutionIndex] = betterSolution
                     risksOfEmployedBee[pickedSolutionIndex] = risk_calculator(betterSolution)
 
-                #Returns the solution with minimum risk when compared two risks
-                betterSolution = globalBest if globalRisk < onlookerRisk else onlookerBee
-
                 globalBest, globalRisk = (globalBest,globalRisk) if globalRisk < onlookerRisk else (onlookerBee,onlookerRisk)              
                 
                 # Food source exhausted. Launch scout bee!
