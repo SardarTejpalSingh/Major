@@ -8,7 +8,7 @@ employedCount = beeCount//2
 scout = 1
 iterCount = 10
 cycles = 300
-limit = 50
+limit = 201
 
 dataset = open("data.txt", "r")
 
@@ -17,7 +17,7 @@ weights = list(map(int, dataset.readline().strip().split()))
 capacity = int(dataset.readline().strip())
 risk_ar = []
 for i in range(n-1):   
-    temp_list = [0]*i 
+    temp_list = [0]*i
     temp_list += map(int, dataset.readline().strip().split())
     risk_ar.append(temp_list)
 
@@ -25,10 +25,10 @@ for i in range(n-1):
 def risk_calculator(solution):
     '''Returns the risk value of the solution'''
     risk_value = -1
-    for i in range(n-1):
-        for j in range(n-1):
-            if i in solution and j in solution:
-                risk_value = max(risk_value, risk_ar[i][j])
+    print(solution)
+    for i in range(len(solution)-2):
+        for j in range(i+1, len(solution)-1):
+            risk_value = max(risk_value, risk_ar[solution[i]][solution[j]-1])
     
     return risk_value
 
@@ -44,14 +44,30 @@ def extract_max(solution):
 
 def initial_solution():
     '''Returns a list containing indices of initial solution'''
-    randList = random.sample(range(0, len(weights)), len(weights))
-    i , total = 0, 0
+    randList = random.sample(range(0, len(weights)-1), 80)
+    i, total = 0, 0
     solution = []
+    total += weights[randList[0]]
+    solution.append(randList[0])
+    flag = 0
     while total < capacity and i < len(randList):
-        randomIndex = randList[i]
-        i+=1
-        total += weights[randomIndex]
-        solution.append(randomIndex)
+        i += 1
+        i1, i2 = 0, 0
+        for j in solution:
+            flag = 0
+            if j > randList[i]:
+                i1 = randList[i]
+                i2 = j-1
+            else:
+                i1 = j
+                i2 = randList[i]-1
+            if risk_ar[i1][i2] == 0:
+                flag = 1
+        if flag == 1:
+            continue
+        else:
+            total += weights[randList[i]]
+            solution.append(randList[i])
     return sorted(solution)
 
 
@@ -63,13 +79,18 @@ def neighbouring_solution(solution):
     for indexToRemove in removeList:            
         solution.pop(indexToRemove%len(solution)) 
     newEleList = random.sample(range(0,len(weights)), len(weights))
-    total = sum(solution)
+    total = 0
+
+    for i in solution:
+        total += weights[i]
     i = 0
     while total < capacity and i < len(newEleList):
         if newEleList[i] not in solution:
             solution.append(newEleList[i])
             total += weights[newEleList[i]]
         i+=1
+
+    
     return sorted(solution)
 
 
@@ -110,7 +131,7 @@ def best_solution_selector(finalSolutions):
 
 def pick_a_solution(employedSolutions, risksOfEmployedBee):
     '''Returns the index of single solution selected by binary tournament method'''
-    twoRandomIndices = random.sample(range(0, len(employedSolutions)), 2)
+    twoRandomIndices = random.sample(range(0, len(employedSolutions)-1), 2)
     risk1 = risksOfEmployedBee[twoRandomIndices[0]]
     risk2 = risksOfEmployedBee[twoRandomIndices[1]]
     probability = (random.randrange(0,100,1))/100
@@ -179,6 +200,8 @@ def init():
         """
         onlookerBees = 0
         while onlookerBees < onlookersCount:
+
+            #Binary Tournament method
             pickedSolutionIndex = pick_a_solution(employedSolutions, risksOfEmployedBee)
             trials, cycleCount = 0, 0
             while cycleCount < cycles:
@@ -203,8 +226,10 @@ def init():
                 if trials == limit:
                     '''Scout bee phase'''
                     print("Scout Bee Delpoyed")
+                    print(onlookerRisk)
                     employedSolutions[pickedSolutionIndex] = launch_scout_bee(employedSolutions)
                     cycleCount = 0
+                    trials = 0
 
             onlookerBees += 1
 
@@ -214,4 +239,4 @@ def init():
         print("Time taken: ",time.clock() - start)
         print(risksOfEmployedBee)
 
-init()
+print(len(risk_ar))
