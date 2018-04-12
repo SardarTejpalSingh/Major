@@ -8,7 +8,7 @@ employedCount = beeCount//2
 scout = 1
 iterCount = 10
 cycles = 300
-limit = 299
+limit = 301
 
 dataset = open("data.txt", "r")
 
@@ -25,8 +25,8 @@ for i in range(n-1):
 def risk_calculator(solution):
     '''Returns the risk value of the solution'''
     risk_value = -1
-    for i in range(len(solution)-2):
-        for j in range(i+1, len(solution)-1):
+    for i in range(len(solution)-1):
+        for j in range(i+1, len(solution)):
             if solution[i]==99:
                 break
             risk_value = max(risk_value, risk_ar[solution[i]][solution[j]])
@@ -58,10 +58,10 @@ def initial_solution():
             flag = 0
             if j > randList[i]:
                 i1 = randList[i]
-                i2 = j-1
+                i2 = j
             else:
                 i1 = j
-                i2 = randList[i]-1
+                i2 = randList[i]
             if risk_ar[i1][i2] == 0:
                 flag = 1
         if flag == 1:
@@ -75,10 +75,21 @@ def initial_solution():
 def neighbouring_solution(solution):
     '''Returns a list containing indices of a neighbouring solution by updating 3 elements randomly'''
     #Generate 3 random indices within the solution list
-    removeList = random.sample(range(0, len(solution)), 3)
+    #removeList = random.sample(range(0, len(solution)), 3)
     #Remove the elements at that specific indices
-    for indexToRemove in removeList:
-        solution.pop(indexToRemove%len(solution))
+    risk_value = -1
+    maxi, maxj = 0, 0
+    for i in range(len(solution)-2):
+        for j in range(i+1, len(solution)-1):
+            if solution[i]==99:
+                break
+            if risk_value < risk_ar[solution[i]][solution[j]]:
+                maxi, maxj = i, j
+                risk_value = risk_ar[solution[i]][solution[j]]
+                
+    
+    solution.pop(maxi)
+    solution.pop(maxj)
     newEleList = random.sample(range(0,len(weights)-1), len(weights)-1)
     total = 0
 
@@ -91,9 +102,7 @@ def neighbouring_solution(solution):
             total += weights[newEleList[i]]
         i+=1
 
-    
     return sorted(solution)
-
 
 def launch_scout_bee(employedSolutions):
     '''Returns a new unique solution'''
@@ -159,7 +168,7 @@ def init():
             if employedBee not in employedSolutions:
                 employedSolutions.append(employedBee)
                  #Calculate the risk of initial solution
-                employedRisk = risk_calculator(employedBee)   
+                employedRisk = risk_calculator(employedBee)
                 risksOfEmployedBee.append(employedRisk)
                 count += 1
             
@@ -211,17 +220,18 @@ def init():
 
                 onlookerBee = neighbouring_solution(employedSolutions[pickedSolutionIndex])
                 onlookerRisk = risk_calculator(onlookerBee)
+                
 
                 #Returns the solution with minimum risk when compared two risks
                 if risksOfEmployedBee[pickedSolutionIndex] < onlookerRisk:
                     trials += 1
                 else:
-                    betterSolution = onlookerBee    
+                    betterSolution = onlookerBee
                     trials = 0
                     employedSolutions[pickedSolutionIndex] = betterSolution
                     risksOfEmployedBee[pickedSolutionIndex] = risk_calculator(betterSolution)
 
-                globalBest, globalRisk = (globalBest,globalRisk) if globalRisk < onlookerRisk else (onlookerBee,onlookerRisk)              
+                globalBest, globalRisk = (globalBest,globalRisk) if globalRisk < onlookerRisk else (onlookerBee,onlookerRisk)
                 
                 # Food source exhausted. Launch scout bee!
                 if trials == limit:
