@@ -6,9 +6,9 @@ beeCount = 50
 onlookersCount = beeCount//2
 employedCount = beeCount//2
 scout = 1
-iterCount = 10
-cycles = 300
-limit = 301
+iterCount = 1
+cycles = 10
+limit = 8
 
 dataset = open("data.txt", "r")
 
@@ -45,32 +45,15 @@ def extract_max(solution):
 
 def initial_solution():
     '''Returns a list containing indices of initial solution'''
-    randList = random.sample(range(0, len(weights)-1), len(weights)-1)
-    i, total = 0, 0
+    randList = random.sample(range(0, len(weights)), len(weights))
+    i , total = 0, 0
     solution = []
-    total += weights[randList[0]]
-    solution.append(randList[0])
-    flag = 0
-    while total < capacity and i < len(randList)-1:
-        i += 1
-        i1, i2 = 0, 0
-        for j in solution:
-            flag = 0
-            if j > randList[i]:
-                i1 = randList[i]
-                i2 = j
-            else:
-                i1 = j
-                i2 = randList[i]
-            if risk_ar[i1][i2] == 0:
-                flag = 1
-        if flag == 1:
-            continue
-        else:
-            total += weights[randList[i]]
-            solution.append(randList[i])
+    while total < capacity and i < len(randList):
+        randomIndex = randList[i]
+        i+=1
+        total += weights[randomIndex]
+        solution.append(randomIndex)
     return sorted(solution)
-
 
 def neighbouring_solution(solution):
     '''Returns a list containing indices of a neighbouring solution by updating 3 elements randomly'''
@@ -127,15 +110,16 @@ def print_best_solution(finalSolutions):
     print(" Risk = ",minRisk)
 
 
-def best_solution_selector(finalSolutions):
-    index, i  = 0, 0
+def best_solution_selector(finalSolutions, risksOfEmployedBee):
+    index  = 0
     minRisk = 100000000000000000000
-    for everySolution in finalSolutions:
-        risk = risk_calculator(everySolution)
+    for j in range(len(finalSolutions)):
+        risk = risksOfEmployedBee[j]
+        #risk = risk_calculator(everySolution)
         if risk < minRisk:
             minRisk = risk
-            index = i
-        i += 1
+            index = j
+            
     return finalSolutions[index]
     
 
@@ -176,7 +160,7 @@ def init():
         """
         Employed Bee Phase
         """
-        globalBest = best_solution_selector(employedSolutions)
+        globalBest = best_solution_selector(employedSolutions, risksOfEmployedBee)
         globalRisk = risk_calculator(globalBest)
 
         onlookerBees = 0
@@ -191,10 +175,9 @@ def init():
                 if risksOfEmployedBee[onlookerBees] < onlookerRisk:
                     trials += 1
                 else:
-                    betterSolution = onlookerBee    
                     trials = 0
-                    employedSolutions[onlookerBees] = betterSolution
-                    risksOfEmployedBee[onlookerBees] = risk_calculator(betterSolution)
+                    employedSolutions[onlookerBees] = onlookerBee
+                    risksOfEmployedBee[onlookerBees] = onlookerRisk
 
                 #Returns the solution with minimum risk when compared two risks
                 betterSolution = globalBest if globalRisk < onlookerRisk else onlookerBee
@@ -220,18 +203,18 @@ def init():
 
                 onlookerBee = neighbouring_solution(employedSolutions[pickedSolutionIndex])
                 onlookerRisk = risk_calculator(onlookerBee)
-                
+
+                print(onlookerRisk, risksOfEmployedBee[pickedSolutionIndex])
 
                 #Returns the solution with minimum risk when compared two risks
                 if risksOfEmployedBee[pickedSolutionIndex] < onlookerRisk:
                     trials += 1
                 else:
-                    betterSolution = onlookerBee
                     trials = 0
-                    employedSolutions[pickedSolutionIndex] = betterSolution
-                    risksOfEmployedBee[pickedSolutionIndex] = risk_calculator(betterSolution)
+                    employedSolutions[pickedSolutionIndex] = onlookerBee
+                    risksOfEmployedBee[pickedSolutionIndex] = onlookerRisk
 
-                globalBest, globalRisk = (globalBest,globalRisk) if globalRisk < onlookerRisk else (onlookerBee,onlookerRisk)
+                globalBest, globalRisk = (globalBest,globalRisk) if globalRisk < onlookerRisk else (onlookerBee, onlookerRisk)
                 
                 # Food source exhausted. Launch scout bee!
                 if trials == limit:
@@ -250,5 +233,4 @@ def init():
         print("Time taken: ",time.clock() - start)
         print(risksOfEmployedBee)
 
-print(risk_ar)
 init()
