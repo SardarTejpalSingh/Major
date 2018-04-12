@@ -8,7 +8,7 @@ employedCount = beeCount//2
 scout = 1
 iterCount = 10
 cycles = 300
-limit = 201
+limit = 299
 
 dataset = open("data.txt", "r")
 
@@ -17,7 +17,7 @@ weights = list(map(int, dataset.readline().strip().split()))
 capacity = int(dataset.readline().strip())
 risk_ar = []
 for i in range(n-1):   
-    temp_list = [0]*i
+    temp_list = [0]*(i+1)
     temp_list += map(int, dataset.readline().strip().split())
     risk_ar.append(temp_list)
 
@@ -25,10 +25,11 @@ for i in range(n-1):
 def risk_calculator(solution):
     '''Returns the risk value of the solution'''
     risk_value = -1
-    print(solution)
     for i in range(len(solution)-2):
         for j in range(i+1, len(solution)-1):
-            risk_value = max(risk_value, risk_ar[solution[i]][solution[j]-1])
+            if solution[i]==99:
+                break
+            risk_value = max(risk_value, risk_ar[solution[i]][solution[j]])
     
     return risk_value
 
@@ -44,13 +45,13 @@ def extract_max(solution):
 
 def initial_solution():
     '''Returns a list containing indices of initial solution'''
-    randList = random.sample(range(0, len(weights)-1), 80)
+    randList = random.sample(range(0, len(weights)-1), len(weights)-1)
     i, total = 0, 0
     solution = []
     total += weights[randList[0]]
     solution.append(randList[0])
     flag = 0
-    while total < capacity and i < len(randList):
+    while total < capacity and i < len(randList)-1:
         i += 1
         i1, i2 = 0, 0
         for j in solution:
@@ -74,11 +75,11 @@ def initial_solution():
 def neighbouring_solution(solution):
     '''Returns a list containing indices of a neighbouring solution by updating 3 elements randomly'''
     #Generate 3 random indices within the solution list
-    removeList = random.sample(range(0, len(solution)), 3)      
+    removeList = random.sample(range(0, len(solution)), 3)
     #Remove the elements at that specific indices
-    for indexToRemove in removeList:            
-        solution.pop(indexToRemove%len(solution)) 
-    newEleList = random.sample(range(0,len(weights)), len(weights))
+    for indexToRemove in removeList:
+        solution.pop(indexToRemove%len(solution))
+    newEleList = random.sample(range(0,len(weights)-1), len(weights)-1)
     total = 0
 
     for i in solution:
@@ -114,7 +115,7 @@ def print_best_solution(finalSolutions):
         i += 1
     for j in finalSolutions[index]:
         print(weights[j], end=" ")
-    print(" Risk = ",minRisk)    
+    print(" Risk = ",minRisk)
 
 
 def best_solution_selector(finalSolutions):
@@ -239,4 +240,5 @@ def init():
         print("Time taken: ",time.clock() - start)
         print(risksOfEmployedBee)
 
-print(len(risk_ar))
+print(risk_ar)
+init()
