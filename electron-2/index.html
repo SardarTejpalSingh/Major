@@ -15,11 +15,13 @@
     <div class="container">
         <h3>Upload the data file</h3>
 
-
-        <input type="file" id="data">
-        <button class="btn waves-effect waves-light" type="submit" name="action" onclick="process()">Submit
-          <i class="material-icons right"></i>
-        </button>
+        
+            <input type="file" id="data" required>
+            <button class="btn waves-effect waves-light" type="submit" name="action" onclick="process()">Submit
+                <i class="material-icons right"></i>
+            </button>
+        
+        
         <p id="result"></p>
     </div>
 
@@ -30,29 +32,30 @@
             file = document.getElementById("data").files[0].path;
             fs.copy(file, 'pycalc/data.txt', (err, info) => {
                 if (err) throw err;
-                document.getElementById("result").innerHTML = "Processing..";
+                document.getElementById("result").innerHTML = "Processing..<br/>";
             });
             //require('./renderer.js');
 
 
-        const electron = require('electron');
+            const electron = require('electron');
 
-const app = electron.app
+            const app = electron.app
 
-const { execFile } = require('child_process');        
+            const { execFile } = require('child_process');
 
-const { spawn } = require('child_process');
+            const { spawn } = require('child_process');
 
-//exec("qbkp.py");
+            //exec("qbkp.py");
 
-let py = spawn('python',['pycalc/qbkp.py'])
-document.getElementById("result").innerHTML = "";
-py.stdout.on('data', data => 
-    document.getElementById("result").innerHTML = data.toString()
-)
-py.on('close', ()=>{
-// Python ends, do stuff
-})
+            let py = spawn('python', ['pycalc/qbkp.py'])
+            py.unref();
+            //document.getElementById("result").innerHTML = "";
+            py.stdout.on('data', data =>
+                document.getElementById("result").innerHTML += data.toString()
+            )
+            py.on('close', () => {
+                // Python ends, do stuff
+            })
         }
     </script>
 </body>

@@ -1,5 +1,5 @@
 import random
-import re
+import sys
 import time
 
 beeCount = 50
@@ -141,7 +141,8 @@ def init():
                 risksOfEmployedBee.append(employedRisk)
                 count += 1
             
-        print("Employed Bee Phase<br>")
+        print("Employed Bee Phase running..<br>")
+        sys.stdout.flush()
         """
         Employed Bee Phase
         """
@@ -173,7 +174,8 @@ def init():
 
             onlookerBees += 1
 
-        print("Onlooker Bee phase<br>")
+        print("Onlooker Bee phase running..<br>")
+        sys.stdout.flush()
         """
         Onlooker Bee phase
         """
@@ -203,16 +205,16 @@ def init():
                 if trials == limit:
                     '''Scout bee phase'''
                     print("Scout Bee Delpoyed<br>")
+                    sys.stdout.flush()
                     employedSolutions[pickedSolutionIndex] = launch_scout_bee(employedSolutions)
                     cycleCount = 0
 
             onlookerBees += 1
 
         bottleNeck = risk_calculator(globalBest)
-        print("<br>Iteration: ",algIteration)
         print(globalBest, globalRisk)
         print("<br>Time taken: ",time.clock() - start)
-        print(risksOfEmployedBee)
+        #print(risksOfEmployedBee)
         return bottleNeck
 
 init()
